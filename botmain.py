@@ -1,9 +1,13 @@
 import socket 
 import re
+import simplejson
+import urllib
+import urllib2
 
-server = "chat.freenode.net"
-channel = "#bot"
-botnick = "mrcoolman"
+url = "https://www.virustotal.com/vtapi/v2/url/report"
+server = "server"
+channel = "#channel"
+botnick = "botnick"
 
 ircsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ircsock.connect((server, 6667)) #connect to server using 6667
@@ -34,8 +38,16 @@ while True:
 	ircmsg = ircmsg.strip('\n\r')
 	
 	if extracturl(ircmsg) != False:
-		url = extracturlVerify(url)
-	 
+		link = extracturl(ircmsg)
+		parameters = {"resource": link,
+			      "apikey": "virus total api key"}
+		data = urllib.urlencode(parameters)
+		req = urllib2.Request(url, data) 
+		response = urllib2.urlopen(req)
+		json = response.read()
+		response_dict = simplejson.loads(json)
+		positives = response_dict.get('positives')
+		
 	print(ircmsg)
 	if ircmsg.find("PING :") != -1:	#respond to server pings
 		ping()
