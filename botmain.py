@@ -26,6 +26,8 @@ def joinchan(chan):
 	ircsock.send("JOIN " + chan +"\n")
 
 def extracturl(msg):
+	if "PRIVMSG" not in msg:
+		return False
 	url = re.search("(?P<url>https?://[^\s]+)", msg)
 	if url is not None: 
     		link = url.group("url")
