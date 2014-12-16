@@ -3,6 +3,8 @@ import re
 import simplejson
 import urllib
 import urllib2
+import urlclean
+
 
 url = "https://www.virustotal.com/vtapi/v2/url/report"
 server = "server"
@@ -26,7 +28,8 @@ def joinchan(chan):
 def extracturl(msg):
 	url = re.search("(?P<url>https?://[^\s]+)", msg)
 	if url is not None: 
-    		return url.group("url")
+    		link = url.group("url")
+		return urlclean.unshorten(link)
 	else:
 		return False
 	
@@ -39,6 +42,7 @@ while True:
 	
 	if extracturl(ircmsg) != False:
 		link = extracturl(ircmsg)
+		
 		parameters = {"resource": link,
 			      "apikey": "virus total api key"}
 		data = urllib.urlencode(parameters)
@@ -47,7 +51,7 @@ while True:
 		json = response.read()
 		response_dict = simplejson.loads(json)
 		positives = response_dict.get('positives')
-		
+			
 	print(ircmsg)
 	if ircmsg.find("PING :") != -1:	#respond to server pings
 		ping()
